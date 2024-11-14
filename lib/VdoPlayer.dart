@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:video_player/video_player.dart';
 
 class VdoPlayer extends StatefulWidget {
@@ -49,6 +50,10 @@ class _VdoPlayerState extends State<VdoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> secureScreen() async{
+      await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+    }
+    secureScreen();
     return Scaffold(
       body: SafeArea(
         child: Stack(
