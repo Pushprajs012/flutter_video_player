@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vdo_player/PdfViewFlutter.dart';
+import 'package:vdo_player/PdfViewer.dart';
 import 'package:vdo_player/UIHelper.dart';
 import 'package:vdo_player/VdoPlayer.dart';
 import 'package:uni_links3/uni_links.dart';
 import 'package:vdo_player/providers/PdfProvider.dart';
+import 'package:vdo_player/providers/PdfProviderFlutter.dart';
+import 'package:vdo_player/providers/VdoPlayerProvider.dart';
 
 void main() {
   runApp(MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => PdfProvider())]));
+      providers: [ChangeNotifierProvider(create: (_) => PdfProvider()),
+        ChangeNotifierProvider(create: (_)=>VdoPlayerProvider()),
+       // ChangeNotifierProvider(create: (_)=>PdfProviderFlutter())
+      ],
+  child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -59,12 +68,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleDeepLink(String deepLink) {
-    if (deepLink != null) {
-      Navigator.push(
+    if (deepLink.endsWith(".mp4")) {
+      Provider.of<VdoPlayerProvider>(context, listen: false).setUrl(deepLink);
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => VdoPlayer(url: deepLink),
+          builder: (context) => VdoPlayer(),
         ),
+      );
+    } else if (deepLink.endsWith(".pdf")) {
+      Provider.of<PdfProvider>(context, listen: false).setPdfUrl(deepLink);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PdfViewer(), // PdfPlayer Widget
+        ),
+      );
+    } else {
+      // Unknown URL handling
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unsupported link type')),
       );
     }
   }
@@ -85,7 +109,8 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Center(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children:
+          [
             Padding(
               padding: EdgeInsets.all(30.0),
               child: UIHelper.editText(_controller, "Enter Url"),
@@ -94,10 +119,12 @@ class _MyHomePageState extends State<MyHomePage> {
               height: 10,
             ),
             UIHelper.btn("Play Vdo", () {
+              final provider = Provider.of<VdoPlayerProvider>(context, listen: false);
+              provider.setUrl(_controller.text);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => VdoPlayer(url: _controller.text)),
+                    builder: (context) => VdoPlayer()),
               );
             })
           ],
